@@ -4,32 +4,31 @@
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
   <script>
-    var loop = false;
+    var t0;
+    var t1;
+
 
     $(function() {
       var conn = new SockJS('http://localhost:8080/push');
       conn.onmessage = function(e) {
+        d = new Date()
+        t1 = d.getTime()
         console.log('Got', e.data);
         $("p.done").html("done");
-        loop = false;
+        $("p.elapsed").html(t1 - t0);
       };
       conn.onopen = function() {
+        d = new Date()
+        t0 = d.getTime()
+        $("p.elapsed").html(t0);
         conn.send("start");
         loop = true;
         $("p.start").html("start");
       }
     });
-    $(function() {
-      i = 0;
-      while(loop) {
-        console.log(i);
-        i = i + 1;
-      }
-
-    });
 </script>
 <p class="start"></p>
-<p class="count"></p>
+<p class="elapsed"></p>
 <p class="done"></p>
 
 </body>
