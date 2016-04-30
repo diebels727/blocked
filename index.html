@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+  <script>
+    var loop = false;
+
+    $(function() {
+      var conn = new SockJS('http://localhost:8080/push');
+      conn.onmessage = function(e) {
+        console.log('Got', e.data);
+        $("p.done").html("done");
+        loop = false;
+      };
+      conn.onopen = function() {
+        conn.send("start");
+        loop = true;
+        $("p.start").html("start");
+      }
+    });
+    $(function() {
+      i = 0;
+      while(loop) {
+        console.log(i);
+        i = i + 1;
+      }
+
+    });
+</script>
+<p class="start"></p>
+<p class="count"></p>
+<p class="done"></p>
+
+</body>
+</html>
