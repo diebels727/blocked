@@ -8,8 +8,10 @@ executor = ThreadPoolExecutor(4)
 process = ProcessPoolExecutor()
 
 def handler(conn):
-    process.submit(blocking_io)
+    future = process.submit(blocking_io)
+    future.result()
     conn.send("done")
+    return "done"
 
 def blocking_io():
     h = {}
@@ -26,7 +28,6 @@ class Connection(SockJSConnection):
     def on_message(self, msg):
         print("Received: %s" % msg)
         executor.submit(handler, self)
-        #self.send(response)
 
 if __name__ == '__main__':
     print("Starting up.")
