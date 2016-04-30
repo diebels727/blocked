@@ -1,12 +1,19 @@
-from tornado import web, ioloop, httpclient, gen
+from tornado import web, ioloop, httpclient, gen, process
 from sockjs.tornado import SockJSRouter, SockJSConnection
 
 from multiplex import MultiplexConnection
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+
+executor = ThreadPoolExecutor(4)
+process = ProcessPoolExecutor()
+
+def handler(conn):
+    process.submit(blocking_io)
+    conn.send("done")
 
 def blocking_io():
     h = {}
-    for i in range(0,10000000):
+    for i in range(0,5000000):
         h[i] = i
         i = h.get(i)
         h[i] = i - 1
@@ -16,19 +23,17 @@ def blocking_io():
 
 
 class Connection(SockJSConnection):
-    @web.asynchronous
     def on_message(self, msg):
         print("Received: %s" % msg)
-        print("Async.")
-        response = yield blocking_io()
-        print("Done blocking.")
-        self.send(response)
+        executor.submit(handler, self)
+        #self.send(response)
 
 if __name__ == '__main__':
     print("Starting up.")
     router = SockJSRouter( Connection, '/push' )
     app = web.Application(router.urls)
     app.listen(8080)
+
     print("Starting IOLoop.")
     ioloop.IOLoop.instance().start()
     print("Done.")
