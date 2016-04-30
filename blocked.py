@@ -6,7 +6,8 @@ class handler(SockJSConnection):
         h = {}
         print("Received: %s" % msg)
         print("Entering blocked loop.")
-        for i in range(0,10000000):
+        #for i in range(0,10000000):
+        for i in range(0,1000000):
             h[i] = i
             i = h.get(i)
             h[i] = i - 1
